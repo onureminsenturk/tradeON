@@ -43,7 +43,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Email gonderme hatasi:', error);
-    return NextResponse.json({ error: 'Email gonderilemedi.' }, { status: 500 });
+    const errMsg = error instanceof Error ? error.message : 'Bilinmeyen hata';
+    console.error('Email gonderme hatasi:', errMsg);
+    return NextResponse.json({ error: `Email gonderilemedi: ${errMsg}` }, { status: 500 });
   }
 }
