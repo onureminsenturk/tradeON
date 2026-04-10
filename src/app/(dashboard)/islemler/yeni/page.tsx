@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTrades } from '@/context/TradeContext';
 import { AssetType, TradeDirection } from '@/types/trade';
-import { assetTypeLabels } from '@/lib/constants';
+import { assetTypeLabels, accountTypeLabels } from '@/lib/constants';
 import { formatCurrency } from '@/lib/formatters';
 import { searchSymbols } from '@/lib/symbols';
 
@@ -19,7 +19,7 @@ function fileToBase64(file: File): Promise<string> {
 
 export default function NewTradePage() {
   const router = useRouter();
-  const { addTrade } = useTrades();
+  const { addTrade, accounts, activeAccountId } = useTrades();
 
   const [form, setForm] = useState({
     symbol: '',
@@ -36,6 +36,7 @@ export default function NewTradePage() {
     rating: 3 as 1 | 2 | 3 | 4 | 5,
     entryDate: new Date().toISOString().slice(0, 16),
     exitDate: '',
+    accountId: activeAccountId || '',
   });
 
   const [beforeChart, setBeforeChart] = useState<string | null>(null);
@@ -128,6 +129,7 @@ export default function NewTradePage() {
       symbol: form.symbol.toUpperCase(),
       assetType: form.assetType,
       direction: form.direction,
+      accountId: form.accountId || null,
       status: form.exitPrice ? 'kapali' : 'acik',
       entryPrice: parseFloat(form.entryPrice),
       exitPrice: form.exitPrice ? parseFloat(form.exitPrice) : null,
@@ -171,6 +173,25 @@ export default function NewTradePage() {
           {/* Left Column - Trade Data */}
           <div className="bg-bg-secondary border border-bg-quaternary/50 rounded-xl p-6 space-y-4">
             <h2 className="text-lg font-semibold text-text-primary mb-2">Islem Bilgileri</h2>
+
+            {/* Account Selector */}
+            {accounts.length > 0 && (
+              <div>
+                <label className="block text-sm text-text-secondary mb-1.5">Hesap</label>
+                <select
+                  value={form.accountId}
+                  onChange={e => update('accountId', e.target.value)}
+                  className="w-full bg-bg-tertiary border border-bg-quaternary rounded-lg px-4 py-2.5 text-text-primary focus:outline-none focus:border-accent-primary transition-colors"
+                >
+                  <option value="">Hesap Secin</option>
+                  {accounts.map(acc => (
+                    <option key={acc.id} value={acc.id}>
+                      {acc.name} ({accountTypeLabels[acc.type] || acc.type})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2 sm:col-span-1 relative" ref={symbolRef}>

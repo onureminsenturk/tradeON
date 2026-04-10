@@ -8,7 +8,7 @@ import { formatCurrency, formatDateShort, formatPercent } from '@/lib/formatters
 import { assetTypeLabels, directionLabels } from '@/lib/constants';
 
 export default function TradesPage() {
-  const { trades, deleteTrade } = useTrades();
+  const { trades, filteredTrades, deleteTrade, accounts, activeAccountId, setActiveAccountId } = useTrades();
   const [search, setSearch] = useState('');
   const [filterAsset, setFilterAsset] = useState<AssetType | ''>('');
   const [filterDirection, setFilterDirection] = useState<TradeDirection | ''>('');
@@ -18,7 +18,7 @@ export default function TradesPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
-    let result = [...trades];
+    let result = [...filteredTrades];
 
     if (search) {
       const q = search.toLowerCase();
@@ -37,7 +37,7 @@ export default function TradesPage() {
     });
 
     return result;
-  }, [trades, search, filterAsset, filterDirection, filterStatus, sortField, sortDir]);
+  }, [filteredTrades, search, filterAsset, filterDirection, filterStatus, sortField, sortDir]);
 
   const toggleSort = (field: typeof sortField) => {
     if (sortField === field) setSortDir((d: string) => d === 'asc' ? 'desc' : 'asc');
@@ -64,6 +64,37 @@ export default function TradesPage() {
           Yeni Islem
         </Link>
       </div>
+
+      {/* Account Selector */}
+      {accounts.length > 0 && (
+        <div className="flex gap-2 flex-wrap">
+          <button
+            onClick={() => setActiveAccountId(null)}
+            className={`px-4 py-2 text-sm rounded-lg transition-all ${
+              activeAccountId === null
+                ? 'bg-accent-primary text-bg-primary font-semibold'
+                : 'bg-bg-secondary text-text-muted hover:text-text-primary border border-bg-quaternary/50'
+            }`}
+          >
+            Tum Hesaplar
+          </button>
+          {accounts.map(acc => (
+            <button
+              key={acc.id}
+              onClick={() => setActiveAccountId(acc.id)}
+              className={`px-4 py-2 text-sm rounded-lg transition-all flex items-center gap-2 ${
+                activeAccountId === acc.id
+                  ? 'font-semibold border-2'
+                  : 'bg-bg-secondary text-text-muted hover:text-text-primary border border-bg-quaternary/50'
+              }`}
+              style={activeAccountId === acc.id ? { backgroundColor: acc.color + '20', borderColor: acc.color, color: acc.color } : {}}
+            >
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: acc.color }} />
+              {acc.name}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
@@ -121,6 +152,7 @@ export default function TradesPage() {
                 {[
                   { key: 'entryDate', label: 'Tarih' },
                   { key: 'symbol', label: 'Sembol' },
+                  { key: null, label: 'Hesap' },
                   { key: null, label: 'Tur' },
                   { key: null, label: 'Yon' },
                   { key: null, label: 'Giris' },
@@ -150,7 +182,7 @@ export default function TradesPage() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={12} className="text-center text-text-muted py-12">
+                  <td colSpan={13} className="text-center text-text-muted py-12">
                     Islem bulunamadi.
                   </td>
                 </tr>
@@ -164,6 +196,19 @@ export default function TradesPage() {
                       <Link href={`/islemler/detay?id=${trade.id}`} className="text-sm font-semibold text-text-primary hover:text-accent-primary transition-colors">
                         {trade.symbol}
                       </Link>
+                    </td>
+                    <td className="px-4 py-3">
+                      {(() => {
+                        const acc = accounts.find(a => a.id === trade.accountId);
+                        return acc ? (
+                          <span className="text-xs px-2 py-0.5 rounded-full flex items-center gap-1.5 w-fit" style={{ backgroundColor: acc.color + '15', color: acc.color }}>
+                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: acc.color }} />
+                            {acc.name}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-text-muted">-</span>
+                        );
+                      })()}
                     </td>
                     <td className="px-4 py-3 text-xs text-text-muted">
                       {assetTypeLabels[trade.assetType]}

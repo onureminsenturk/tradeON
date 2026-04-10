@@ -1,3 +1,14 @@
+export interface TradingAccount {
+  id: string;
+  userId: string;
+  name: string;
+  type: 'funded' | 'kripto' | 'kisisel' | 'demo' | 'diger';
+  balance: number;
+  currency: string;
+  color: string;
+  createdAt: string;
+}
+
 export type AssetType = 'hisse' | 'forex' | 'kripto' | 'emtia' | 'endeks' | 'opsiyon' | 'vadeli';
 
 export type TradeDirection = 'long' | 'short';
@@ -9,6 +20,7 @@ export type DayMood = 'harika' | 'iyi' | 'notr' | 'kotu' | 'berbat';
 export interface Trade {
   id: string;
   userId: string;
+  accountId: string | null;
   symbol: string;
   assetType: AssetType;
   direction: TradeDirection;
@@ -39,6 +51,7 @@ export type TransactionType = 'deposit' | 'withdrawal';
 export interface Transaction {
   id: string;
   userId: string;
+  accountId: string | null;
   type: TransactionType;
   amount: number;
   note: string;

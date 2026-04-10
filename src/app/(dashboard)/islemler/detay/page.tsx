@@ -10,7 +10,7 @@ function TradeDetail() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tradeId = searchParams.get('id');
-  const { trades, updateTrade, deleteTrade } = useTrades();
+  const { trades, updateTrade, deleteTrade, accounts } = useTrades();
   const [exitPrice, setExitPrice] = useState('');
   const [exitDate, setExitDate] = useState('');
   const [notes, setNotes] = useState('');
@@ -72,7 +72,18 @@ function TradeDetail() {
                 {trade.status === 'acik' ? 'Acik' : 'Kapali'}
               </span>
             </div>
-            <p className="text-text-muted text-sm">{assetTypeLabels[trade.assetType]}</p>
+            <p className="text-text-muted text-sm flex items-center gap-2">
+              {assetTypeLabels[trade.assetType]}
+              {(() => {
+                const acc = accounts.find(a => a.id === trade.accountId);
+                return acc ? (
+                  <span className="text-xs px-2 py-0.5 rounded-full flex items-center gap-1.5" style={{ backgroundColor: acc.color + '15', color: acc.color }}>
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: acc.color }} />
+                    {acc.name}
+                  </span>
+                ) : null;
+              })()}
+            </p>
           </div>
         </div>
       </div>

@@ -27,7 +27,7 @@ const tooltipStyle = {
 };
 
 export default function PerformancePage() {
-  const { trades } = useTrades();
+  const { filteredTrades: trades } = useTrades();
   const { user } = useAuth();
   const [period, setPeriod] = useState<PeriodType>('aylik');
 

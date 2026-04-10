@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useTrades } from '@/context/TradeContext';
 import { calculatePerformanceMetrics, calculateWinRate, calculateProfitFactor, getClosedTrades } from '@/lib/calculations';
 import { formatCurrency, formatPercent, formatDateShort } from '@/lib/formatters';
+import { accountTypeLabels, accountColors } from '@/lib/constants';
 import EquityCurveChart from '@/components/dashboard/EquityCurveChart';
 import DailyPnLChart from '@/components/dashboard/DailyPnLChart';
 import AssetDistribution from '@/components/dashboard/AssetDistribution';
@@ -14,22 +15,39 @@ import RecentTrades from '@/components/dashboard/RecentTrades';
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const { trades, transactions, addTransaction, deleteTransaction, getNetTransactions } = useTrades();
+  const {
+    filteredTrades, filteredTransactions, transactions,
+    accounts, activeAccountId, setActiveAccountId,
+    addTransaction, deleteTransaction, getNetTransactions,
+    addAccount, deleteAccount,
+  } = useTrades();
   const [showTxModal, setShowTxModal] = useState(false);
   const [txType, setTxType] = useState<'deposit' | 'withdrawal'>('deposit');
   const [txAmount, setTxAmount] = useState('');
   const [txNote, setTxNote] = useState('');
   const [showTxList, setShowTxList] = useState(false);
+  const [showNewAccount, setShowNewAccount] = useState(false);
+  const [newAccName, setNewAccName] = useState('');
+  const [newAccType, setNewAccType] = useState<'funded' | 'kripto' | 'kisisel' | 'demo' | 'diger'>('kisisel');
+  const [newAccBalance, setNewAccBalance] = useState('');
+  const [deleteAccId, setDeleteAccId] = useState<string | null>(null);
+
+  const trades = filteredTrades;
 
   const metrics = useMemo(() => {
-    const startingBalance = user?.settings.startingBalance || 10000;
+    const startingBalance = activeAccountId
+      ? accounts.find(a => a.id === activeAccountId)?.balance || 10000
+      : user?.settings.startingBalance || 10000;
     return calculatePerformanceMetrics(trades, startingBalance);
-  }, [trades, user]);
+  }, [trades, user, activeAccountId, accounts]);
 
   const closed = getClosedTrades(trades);
   const totalPnL = closed.reduce((s, t) => s + (t.pnl ?? 0), 0);
   const netTransactions = getNetTransactions();
-  const currentBalance = (user?.settings.startingBalance || 10000) + totalPnL + netTransactions;
+  const startBal = activeAccountId
+    ? accounts.find(a => a.id === activeAccountId)?.balance || 10000
+    : user?.settings.startingBalance || 10000;
+  const currentBalance = startBal + totalPnL + netTransactions;
 
   const handleAddTransaction = () => {
     const amount = parseFloat(txAmount);
@@ -39,19 +57,37 @@ export default function DashboardPage() {
       amount,
       note: txNote,
       date: new Date().toISOString(),
+      accountId: activeAccountId,
     });
     setTxAmount('');
     setTxNote('');
     setShowTxModal(false);
   };
+
+  const handleAddAccount = () => {
+    if (!newAccName.trim()) return;
+    addAccount({
+      name: newAccName.trim(),
+      type: newAccType,
+      balance: parseFloat(newAccBalance) || 0,
+      currency: user?.settings.currency || 'USD',
+      color: accountColors[accounts.length % accountColors.length],
+    });
+    setNewAccName('');
+    setNewAccBalance('');
+    setShowNewAccount(false);
+  };
+
   const winRate = calculateWinRate(trades);
   const profitFactor = calculateProfitFactor(trades);
 
+  const activeAccount = accounts.find(a => a.id === activeAccountId);
+
   const statCards = [
     {
-      label: 'Toplam Bakiye',
+      label: activeAccount ? `${activeAccount.name} Bakiye` : 'Toplam Bakiye',
       value: formatCurrency(currentBalance, user?.settings.currency || 'USD'),
-      change: formatPercent((totalPnL / (user?.settings.startingBalance || 10000)) * 100),
+      change: formatPercent((totalPnL / startBal) * 100),
       isPositive: totalPnL >= 0,
       icon: (
         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -94,6 +130,10 @@ export default function DashboardPage() {
     },
   ];
 
+  const displayTxs = activeAccountId !== null
+    ? filteredTransactions
+    : transactions;
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -104,7 +144,7 @@ export default function DashboardPage() {
           </h1>
           <p className="text-text-muted text-sm mt-1">Trading performansinizin ozeti</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <button
             onClick={() => { setTxType('deposit'); setShowTxModal(true); }}
             className="inline-flex items-center gap-1.5 bg-profit/10 hover:bg-profit/20 text-profit font-semibold px-4 py-2.5 rounded-lg transition-all text-sm"
@@ -133,6 +173,91 @@ export default function DashboardPage() {
             Yeni Islem
           </a>
         </div>
+      </div>
+
+      {/* Account Selector */}
+      <div className="bg-bg-secondary border border-bg-quaternary/50 rounded-xl p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-text-primary">Hesaplar</h3>
+          <button
+            onClick={() => setShowNewAccount(true)}
+            className="text-xs text-accent-primary hover:text-accent-hover transition-colors flex items-center gap-1"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Yeni Hesap
+          </button>
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          <button
+            onClick={() => setActiveAccountId(null)}
+            className={`px-4 py-2 text-sm rounded-lg font-medium transition-all ${
+              activeAccountId === null
+                ? 'bg-accent-primary/15 text-accent-primary border border-accent-primary/40'
+                : 'bg-bg-tertiary text-text-muted border border-bg-quaternary hover:border-text-muted'
+            }`}
+          >
+            Tum Hesaplar
+          </button>
+          {accounts.map(acc => {
+            const isActive = activeAccountId === acc.id;
+            return (
+              <button
+                key={acc.id}
+                onClick={() => setActiveAccountId(isActive ? null : acc.id)}
+                className={`px-4 py-2 text-sm rounded-lg font-medium transition-all relative group ${
+                  isActive
+                    ? 'border text-text-primary'
+                    : 'bg-bg-tertiary text-text-muted border border-bg-quaternary hover:border-text-muted'
+                }`}
+                style={isActive ? { backgroundColor: `${acc.color}15`, borderColor: `${acc.color}60`, color: acc.color } : {}}
+              >
+                <span className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: acc.color }} />
+                  {acc.name}
+                </span>
+                {/* Delete button */}
+                <span
+                  onClick={(e) => { e.stopPropagation(); setDeleteAccId(acc.id); }}
+                  className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-loss/80 rounded-full items-center justify-center text-white text-[8px] hidden group-hover:flex cursor-pointer"
+                >
+                  ✕
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        {/* Account summary cards */}
+        {accounts.length > 0 && activeAccountId === null && (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-4 pt-3 border-t border-bg-quaternary/30">
+            {accounts.map(acc => {
+              const accTrades = getClosedTrades(trades.filter(t => t.accountId === acc.id));
+              const accPnL = accTrades.reduce((s, t) => s + (t.pnl ?? 0), 0);
+              const accNetTx = getNetTransactions(acc.id);
+              const accBalance = acc.balance + accPnL + accNetTx;
+              return (
+                <div
+                  key={acc.id}
+                  onClick={() => setActiveAccountId(acc.id)}
+                  className="bg-bg-tertiary/50 rounded-lg p-3 cursor-pointer hover:bg-bg-tertiary transition-colors"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: acc.color }} />
+                    <span className="text-xs text-text-secondary font-medium truncate">{acc.name}</span>
+                    <span className="text-[10px] text-text-muted ml-auto">{accountTypeLabels[acc.type]}</span>
+                  </div>
+                  <p className="text-sm font-bold font-tabular text-text-primary">
+                    {formatCurrency(accBalance, acc.currency || 'USD')}
+                  </p>
+                  <p className={`text-xs font-tabular mt-0.5 ${accPnL >= 0 ? 'text-profit' : 'text-loss'}`}>
+                    {accPnL >= 0 ? '+' : ''}{formatCurrency(accPnL, acc.currency || 'USD')} K/Z
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Stat Cards */}
@@ -194,7 +319,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Transaction History */}
-      {transactions.length > 0 && (
+      {displayTxs.length > 0 && (
         <div className="bg-bg-secondary border border-bg-quaternary/50 rounded-xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-text-primary">Para Hareketleri</h3>
@@ -202,57 +327,59 @@ export default function DashboardPage() {
               onClick={() => setShowTxList(!showTxList)}
               className="text-xs text-accent-primary hover:text-accent-hover transition-colors"
             >
-              {showTxList ? 'Gizle' : `Tumu (${transactions.length})`}
+              {showTxList ? 'Gizle' : `Tumu (${displayTxs.length})`}
             </button>
           </div>
           {showTxList && (
             <div className="space-y-2">
-              {transactions.map(tx => (
-                <div key={tx.id} className="flex items-center justify-between py-2 px-3 rounded-lg bg-bg-tertiary/50">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      tx.type === 'deposit' ? 'bg-profit/10 text-profit' : 'bg-loss/10 text-loss'
-                    }`}>
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        {tx.type === 'deposit'
-                          ? <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m0 0l-6-6m6 6l6-6" />
-                          : <path strokeLinecap="round" strokeLinejoin="round" d="M12 19.5v-15m0 0l-6 6m6-6l6 6" />
-                        }
-                      </svg>
+              {displayTxs.map(tx => {
+                const txAcc = accounts.find(a => a.id === tx.accountId);
+                return (
+                  <div key={tx.id} className="flex items-center justify-between py-2 px-3 rounded-lg bg-bg-tertiary/50">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        tx.type === 'deposit' ? 'bg-profit/10 text-profit' : 'bg-loss/10 text-loss'
+                      }`}>
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          {tx.type === 'deposit'
+                            ? <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m0 0l-6-6m6 6l6-6" />
+                            : <path strokeLinecap="round" strokeLinejoin="round" d="M12 19.5v-15m0 0l-6 6m6-6l6 6" />
+                          }
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm text-text-primary font-medium flex items-center gap-2">
+                          {tx.type === 'deposit' ? 'Para Yatirma' : 'Para Cekme'}
+                          {txAcc && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: `${txAcc.color}15`, color: txAcc.color }}>
+                              {txAcc.name}
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-xs text-text-muted">
+                          {formatDateShort(tx.date)}{tx.note ? ` — ${tx.note}` : ''}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-text-primary font-medium">
-                        {tx.type === 'deposit' ? 'Para Yatirma' : 'Para Cekme'}
-                      </p>
-                      <p className="text-xs text-text-muted">
-                        {formatDateShort(tx.date)}{tx.note ? ` — ${tx.note}` : ''}
-                      </p>
+                    <div className="flex items-center gap-3">
+                      <span className={`text-sm font-semibold font-tabular ${
+                        tx.type === 'deposit' ? 'text-profit' : 'text-loss'
+                      }`}>
+                        {tx.type === 'deposit' ? '+' : '-'}{formatCurrency(tx.amount, user?.settings.currency || 'USD')}
+                      </span>
+                      <button
+                        onClick={() => deleteTransaction(tx.id)}
+                        className="p-1 text-text-muted hover:text-loss transition-colors"
+                        title="Sil"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className={`text-sm font-semibold font-tabular ${
-                      tx.type === 'deposit' ? 'text-profit' : 'text-loss'
-                    }`}>
-                      {tx.type === 'deposit' ? '+' : '-'}{formatCurrency(tx.amount, user?.settings.currency || 'USD')}
-                    </span>
-                    <button
-                      onClick={() => deleteTransaction(tx.id)}
-                      className="p-1 text-text-muted hover:text-loss transition-colors"
-                      title="Sil"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              ))}
-              <div className="flex justify-between pt-2 border-t border-bg-quaternary/30 mt-2">
-                <span className="text-xs text-text-muted">Net Para Hareketi</span>
-                <span className={`text-sm font-bold font-tabular ${netTransactions >= 0 ? 'text-profit' : 'text-loss'}`}>
-                  {netTransactions >= 0 ? '+' : ''}{formatCurrency(netTransactions, user?.settings.currency || 'USD')}
-                </span>
-              </div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -265,81 +392,92 @@ export default function DashboardPage() {
             <h3 className="text-lg font-bold text-text-primary mb-4">
               {txType === 'deposit' ? 'Para Yatir' : 'Para Cek'}
             </h3>
-
             <div className="space-y-4">
-              {/* Type Toggle */}
               <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setTxType('deposit')}
-                  className={`py-2 rounded-lg text-sm font-semibold transition-all ${
-                    txType === 'deposit'
-                      ? 'bg-profit/20 text-profit border border-profit/50'
-                      : 'bg-bg-tertiary text-text-muted border border-bg-quaternary'
-                  }`}
-                >
-                  Yatir
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTxType('withdrawal')}
-                  className={`py-2 rounded-lg text-sm font-semibold transition-all ${
-                    txType === 'withdrawal'
-                      ? 'bg-loss/20 text-loss border border-loss/50'
-                      : 'bg-bg-tertiary text-text-muted border border-bg-quaternary'
-                  }`}
-                >
-                  Cek
-                </button>
+                <button type="button" onClick={() => setTxType('deposit')}
+                  className={`py-2 rounded-lg text-sm font-semibold transition-all ${txType === 'deposit' ? 'bg-profit/20 text-profit border border-profit/50' : 'bg-bg-tertiary text-text-muted border border-bg-quaternary'}`}>Yatir</button>
+                <button type="button" onClick={() => setTxType('withdrawal')}
+                  className={`py-2 rounded-lg text-sm font-semibold transition-all ${txType === 'withdrawal' ? 'bg-loss/20 text-loss border border-loss/50' : 'bg-bg-tertiary text-text-muted border border-bg-quaternary'}`}>Cek</button>
               </div>
-
               <div>
                 <label className="block text-sm text-text-secondary mb-1.5">Tutar *</label>
-                <input
-                  type="number"
-                  step="any"
-                  value={txAmount}
-                  onChange={e => setTxAmount(e.target.value)}
-                  className="w-full bg-bg-tertiary border border-bg-quaternary rounded-lg px-4 py-2.5 text-text-primary font-tabular focus:outline-none focus:border-accent-primary transition-colors"
-                  placeholder="0.00"
-                  autoFocus
-                />
+                <input type="number" step="any" value={txAmount} onChange={e => setTxAmount(e.target.value)}
+                  className="w-full bg-bg-tertiary border border-bg-quaternary rounded-lg px-4 py-2.5 text-text-primary font-tabular focus:outline-none focus:border-accent-primary transition-colors" placeholder="0.00" autoFocus />
               </div>
-
               <div>
                 <label className="block text-sm text-text-secondary mb-1.5">Not (istege bagli)</label>
-                <input
-                  type="text"
-                  value={txNote}
-                  onChange={e => setTxNote(e.target.value)}
-                  className="w-full bg-bg-tertiary border border-bg-quaternary rounded-lg px-4 py-2.5 text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary transition-colors"
-                  placeholder="Banka transferi, bonus..."
-                />
+                <input type="text" value={txNote} onChange={e => setTxNote(e.target.value)}
+                  className="w-full bg-bg-tertiary border border-bg-quaternary rounded-lg px-4 py-2.5 text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary transition-colors" placeholder="Banka transferi, bonus..." />
               </div>
-
-              <p className="text-xs text-text-muted">
-                Bu islem sadece bakiyenizi etkiler. K/Z, basari orani gibi istatistikler degismez.
-              </p>
+              {activeAccountId && activeAccount && (
+                <p className="text-xs text-accent-primary">Hesap: {activeAccount.name}</p>
+              )}
+              <p className="text-xs text-text-muted">Bu islem sadece bakiyeyi etkiler. K/Z istatistikleri degismez.</p>
             </div>
-
             <div className="flex gap-3 justify-end mt-6">
-              <button
-                onClick={() => { setShowTxModal(false); setTxAmount(''); setTxNote(''); }}
-                className="px-4 py-2 text-sm rounded-lg bg-bg-tertiary text-text-secondary hover:text-text-primary transition-colors"
-              >
-                Iptal
-              </button>
-              <button
-                onClick={handleAddTransaction}
-                disabled={!txAmount || parseFloat(txAmount) <= 0}
-                className={`px-5 py-2 text-sm rounded-lg font-semibold transition-all disabled:opacity-50 ${
-                  txType === 'deposit'
-                    ? 'bg-profit/20 text-profit hover:bg-profit/30'
-                    : 'bg-loss/20 text-loss hover:bg-loss/30'
-                }`}
-              >
+              <button onClick={() => { setShowTxModal(false); setTxAmount(''); setTxNote(''); }}
+                className="px-4 py-2 text-sm rounded-lg bg-bg-tertiary text-text-secondary hover:text-text-primary transition-colors">Iptal</button>
+              <button onClick={handleAddTransaction} disabled={!txAmount || parseFloat(txAmount) <= 0}
+                className={`px-5 py-2 text-sm rounded-lg font-semibold transition-all disabled:opacity-50 ${txType === 'deposit' ? 'bg-profit/20 text-profit hover:bg-profit/30' : 'bg-loss/20 text-loss hover:bg-loss/30'}`}>
                 {txType === 'deposit' ? 'Yatir' : 'Cek'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Account Modal */}
+      {showNewAccount && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-bg-secondary border border-bg-quaternary rounded-xl p-6 max-w-sm w-full animate-fade-in">
+            <h3 className="text-lg font-bold text-text-primary mb-4">Yeni Hesap Ekle</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-text-secondary mb-1.5">Hesap Adi *</label>
+                <input type="text" value={newAccName} onChange={e => setNewAccName(e.target.value)}
+                  className="w-full bg-bg-tertiary border border-bg-quaternary rounded-lg px-4 py-2.5 text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary transition-colors"
+                  placeholder="orn: Funded 100K, OKX Kripto..." autoFocus />
+              </div>
+              <div>
+                <label className="block text-sm text-text-secondary mb-1.5">Hesap Turu</label>
+                <select value={newAccType} onChange={e => setNewAccType(e.target.value as typeof newAccType)}
+                  className="w-full bg-bg-tertiary border border-bg-quaternary rounded-lg px-4 py-2.5 text-text-primary focus:outline-none focus:border-accent-primary transition-colors">
+                  {Object.entries(accountTypeLabels).map(([k, v]) => (
+                    <option key={k} value={k}>{v}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm text-text-secondary mb-1.5">Baslangic Bakiyesi</label>
+                <input type="number" step="any" value={newAccBalance} onChange={e => setNewAccBalance(e.target.value)}
+                  className="w-full bg-bg-tertiary border border-bg-quaternary rounded-lg px-4 py-2.5 text-text-primary font-tabular focus:outline-none focus:border-accent-primary transition-colors"
+                  placeholder="orn: 100000" />
+              </div>
+            </div>
+            <div className="flex gap-3 justify-end mt-6">
+              <button onClick={() => { setShowNewAccount(false); setNewAccName(''); setNewAccBalance(''); }}
+                className="px-4 py-2 text-sm rounded-lg bg-bg-tertiary text-text-secondary hover:text-text-primary transition-colors">Iptal</button>
+              <button onClick={handleAddAccount} disabled={!newAccName.trim()}
+                className="px-5 py-2 text-sm rounded-lg bg-accent-primary hover:bg-accent-hover text-bg-primary font-semibold transition-all disabled:opacity-50">Olustur</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Account Confirm */}
+      {deleteAccId && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-bg-secondary border border-bg-quaternary rounded-xl p-6 max-w-sm w-full animate-fade-in">
+            <h3 className="text-lg font-bold text-text-primary mb-2">Hesabi Sil</h3>
+            <p className="text-text-secondary text-sm mb-1">
+              <strong>{accounts.find(a => a.id === deleteAccId)?.name}</strong> hesabini silmek istediginize emin misiniz?
+            </p>
+            <p className="text-text-muted text-xs mb-6">Islemler silinmez, sadece hesapsiz olarak kalir.</p>
+            <div className="flex gap-3 justify-end">
+              <button onClick={() => setDeleteAccId(null)}
+                className="px-4 py-2 text-sm rounded-lg bg-bg-tertiary text-text-secondary hover:text-text-primary transition-colors">Iptal</button>
+              <button onClick={() => { deleteAccount(deleteAccId); setDeleteAccId(null); }}
+                className="px-4 py-2 text-sm rounded-lg bg-loss/10 text-loss hover:bg-loss/20 transition-colors">Sil</button>
             </div>
           </div>
         </div>

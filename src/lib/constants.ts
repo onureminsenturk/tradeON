@@ -37,6 +37,19 @@ export const marketConditionLabels = {
   yatay: 'Yatay',
 };
 
+export const accountTypeLabels: Record<string, string> = {
+  funded: 'Funded Hesap',
+  kripto: 'Kripto Hesap',
+  kisisel: 'Kisisel Hesap',
+  demo: 'Demo Hesap',
+  diger: 'Diger',
+};
+
+export const accountColors = [
+  '#06b6d4', '#8b5cf6', '#f59e0b', '#ec4899', '#10b981', '#f97316',
+  '#3b82f6', '#ef4444', '#14b8a6', '#a855f7',
+];
+
 export const currencySymbols: Record<string, string> = {
   TRY: '₺',
   USD: '$',
