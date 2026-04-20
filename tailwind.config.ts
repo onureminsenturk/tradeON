@@ -10,27 +10,31 @@ const config: Config = {
     extend: {
       colors: {
         bg: {
-          primary: "#0a0e17",
-          secondary: "#111827",
-          tertiary: "#1f2937",
-          quaternary: "#374151",
+          primary: "#060909",
+          secondary: "#0d1511",
+          tertiary: "#172119",
+          quaternary: "#243526",
         },
         text: {
-          primary: "#f9fafb",
-          secondary: "#9ca3af",
-          muted: "#6b7280",
+          primary: "#eaf5eb",
+          secondary: "#7da480",
+          muted: "#4d6550",
         },
         accent: {
-          primary: "#06b6d4",
-          hover: "#22d3ee",
+          primary: "#16c660",
+          hover: "#0fa84f",
         },
-        profit: "#10b981",
-        loss: "#ef4444",
-        warning: "#f59e0b",
+        profit: "#1fd660",
+        loss: "#f23535",
+        warning: "#fbb424",
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
         mono: ["JetBrains Mono", "monospace"],
+      },
+      boxShadow: {
+        'glow-green': '0 0 20px rgba(22, 198, 96, 0.25)',
+        'glow-red': '0 0 20px rgba(242, 53, 53, 0.25)',
       },
     },
   },

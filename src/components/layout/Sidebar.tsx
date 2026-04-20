@@ -56,7 +56,7 @@ const navItems = [
     href: '/ayarlar',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
         <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
       </svg>
     ),
@@ -71,64 +71,123 @@ export default function Sidebar() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className={`hidden md:flex flex-col ${collapsed ? 'w-20' : 'w-64'} bg-bg-secondary border-r border-bg-quaternary/50 h-screen sticky top-0 transition-all duration-300`}>
+      <aside className={`hidden md:flex flex-col ${collapsed ? 'w-[72px]' : 'w-64'} bg-bg-secondary border-r border-bg-quaternary/60 h-screen sticky top-0 transition-all duration-300 relative`}>
+
+        {/* Green left accent stripe */}
+        <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-accent-primary via-profit/60 to-loss/40 rounded-r" />
+
         {/* Logo */}
-        <div className="flex items-center justify-between p-4 border-b border-bg-quaternary/50">
-          {!collapsed && <h1 className="text-xl font-bold gradient-text">TradeON</h1>}
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="p-2 rounded-lg hover:bg-bg-tertiary text-text-muted hover:text-text-primary transition-colors"
-          >
-            <svg className={`w-5 h-5 transition-transform ${collapsed ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" />
-            </svg>
-          </button>
+        <div className={`flex items-center ${collapsed ? 'justify-center' : 'justify-between'} px-4 py-5 border-b border-bg-quaternary/50`}>
+          {!collapsed && (
+            <div className="flex items-center gap-2">
+              {/* Mini chart icon */}
+              <div className="flex items-end gap-0.5 h-6">
+                <div className="w-1 bg-loss/80 rounded-sm" style={{ height: '40%' }} />
+                <div className="w-1 bg-loss/80 rounded-sm" style={{ height: '65%' }} />
+                <div className="w-1 bg-profit rounded-sm" style={{ height: '80%' }} />
+                <div className="w-1 bg-profit rounded-sm" style={{ height: '100%' }} />
+                <div className="w-1 bg-accent-primary rounded-sm" style={{ height: '85%' }} />
+              </div>
+              <span className="text-xl font-bold gradient-text tracking-wide">TradeON</span>
+            </div>
+          )}
+          {collapsed && (
+            <div className="flex items-end gap-0.5 h-6">
+              <div className="w-1 bg-loss/80 rounded-sm" style={{ height: '40%' }} />
+              <div className="w-1 bg-profit rounded-sm" style={{ height: '80%' }} />
+              <div className="w-1 bg-accent-primary rounded-sm" style={{ height: '100%' }} />
+            </div>
+          )}
+          {!collapsed && (
+            <button
+              onClick={() => setCollapsed(true)}
+              className="p-1.5 rounded-lg hover:bg-bg-tertiary text-text-muted hover:text-accent-primary transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" />
+              </svg>
+            </button>
+          )}
+          {collapsed && (
+            <button
+              onClick={() => setCollapsed(false)}
+              className="absolute -right-3 top-6 w-6 h-6 rounded-full bg-bg-tertiary border border-bg-quaternary/80 flex items-center justify-center text-text-muted hover:text-accent-primary hover:border-accent-primary/50 transition-colors shadow-lg"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </button>
+          )}
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 p-3 space-y-1">
+        <nav className="flex-1 p-3 space-y-0.5">
           {navItems.map(item => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+                title={collapsed ? item.label : undefined}
+                className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'} px-3 py-2.5 rounded-lg transition-all relative group ${
                   isActive
-                    ? 'bg-accent-primary/10 text-accent-primary border-l-2 border-accent-primary'
+                    ? 'bg-accent-primary/10 text-accent-primary'
                     : 'text-text-secondary hover:bg-bg-tertiary hover:text-text-primary'
                 }`}
               >
+                {isActive && (
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-accent-primary rounded-r" />
+                )}
                 {item.icon}
                 {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
+                {/* Tooltip when collapsed */}
+                {collapsed && (
+                  <div className="absolute left-full ml-3 px-2.5 py-1 bg-bg-tertiary border border-bg-quaternary text-text-primary text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 shadow-xl">
+                    {item.label}
+                  </div>
+                )}
               </Link>
             );
           })}
         </nav>
 
+        {/* Market status indicator */}
+        {!collapsed && (
+          <div className="mx-3 mb-3 px-3 py-2 bg-bg-tertiary/50 rounded-lg border border-bg-quaternary/40 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-accent-primary animate-pulse" />
+            <span className="text-xs text-text-muted">Sistem Aktif</span>
+          </div>
+        )}
+
         {/* User */}
-        <div className="p-4 border-t border-bg-quaternary/50">
+        <div className={`p-3 border-t border-bg-quaternary/50 ${collapsed ? 'flex justify-center' : ''}`}>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-accent-primary/20 flex items-center justify-center text-accent-primary font-semibold text-sm">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-accent-primary/30 to-profit/20 border border-accent-primary/30 flex items-center justify-center text-accent-primary font-bold text-sm flex-shrink-0">
               {user?.displayName?.charAt(0).toUpperCase() || 'U'}
             </div>
             {!collapsed && (
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-text-primary truncate">{user?.displayName}</p>
-                <p className="text-xs text-text-muted truncate">{user?.email}</p>
-              </div>
+              <>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-text-primary truncate">{user?.displayName}</p>
+                  <p className="text-xs text-text-muted truncate">{user?.email}</p>
+                </div>
+                <button
+                  onClick={logout}
+                  className="p-1.5 rounded-lg hover:bg-loss/10 text-text-muted hover:text-loss transition-colors"
+                  title="Cikis Yap"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                  </svg>
+                </button>
+              </>
             )}
-            <button onClick={logout} className="p-1.5 rounded-lg hover:bg-bg-tertiary text-text-muted hover:text-loss transition-colors" title="Cikis Yap">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-              </svg>
-            </button>
           </div>
         </div>
       </aside>
 
       {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-bg-secondary border-t border-bg-quaternary/50 z-50">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-bg-secondary border-t border-bg-quaternary/60 z-50">
         <div className="flex justify-around py-2">
           {navItems.slice(0, 5).map(item => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/');

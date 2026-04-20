@@ -5,18 +5,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg-primary: #0a0e17;
-  --bg-secondary: #111827;
-  --bg-tertiary: #1f2937;
-  --bg-quaternary: #374151;
-  --text-primary: #f9fafb;
-  --text-secondary: #9ca3af;
-  --text-muted: #6b7280;
-  --accent-primary: #06b6d4;
-  --accent-hover: #22d3ee;
-  --profit: #10b981;
-  --loss: #ef4444;
-  --warning: #f59e0b;
+  --bg-primary: #060909;
+  --bg-secondary: #0d1511;
+  --bg-tertiary: #172119;
+  --bg-quaternary: #243526;
+  --text-primary: #eaf5eb;
+  --text-secondary: #7da480;
+  --text-muted: #4d6550;
+  --accent-primary: #16c660;
+  --accent-hover: #0fa84f;
+  --profit: #1fd660;
+  --loss: #f23535;
+  --warning: #fbb424;
 }
 
 * {
@@ -49,7 +49,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: var(--accent-primary);
 }
 
 /* Tabular numbers for financial data */
@@ -59,21 +59,21 @@ body {
 }
 
 /* Glow effects */
-.glow-cyan {
-  box-shadow: 0 0 20px rgba(6, 182, 212, 0.15);
+.glow-green {
+  box-shadow: 0 0 24px rgba(22, 198, 96, 0.18);
 }
 
 .glow-profit {
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+  box-shadow: 0 0 20px rgba(31, 214, 96, 0.18);
 }
 
 .glow-loss {
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
+  box-shadow: 0 0 20px rgba(242, 53, 53, 0.18);
 }
 
-/* Gradient text */
+/* Gradient text - green to red */
 .gradient-text {
-  background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+  background: linear-gradient(135deg, #16c660, #f23535);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -86,7 +86,7 @@ body {
 
 .card-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 1px rgba(22, 198, 96, 0.2);
 }
 
 /* Fade in animation */
@@ -99,10 +99,10 @@ body {
   animation: fadeIn 0.5s ease forwards;
 }
 
-/* Pulse glow animation */
+/* Pulse glow animation - green */
 @keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 5px rgba(6, 182, 212, 0.2); }
-  50% { box-shadow: 0 0 20px rgba(6, 182, 212, 0.4); }
+  0%, 100% { box-shadow: 0 0 5px rgba(22, 198, 96, 0.2); }
+  50% { box-shadow: 0 0 22px rgba(22, 198, 96, 0.45); }
 }
 
 .animate-pulse-glow {
@@ -132,6 +132,32 @@ input[type="number"] {
 
 /* Selection */
 ::selection {
-  background: rgba(6, 182, 212, 0.3);
+  background: rgba(22, 198, 96, 0.28);
   color: white;
+}
+
+/* Subtle top-border accent on cards */
+.card-accent-green {
+  border-top: 2px solid var(--accent-primary);
+}
+
+.card-accent-red {
+  border-top: 2px solid var(--loss);
+}
+
+/* Trading terminal scanline effect (very subtle) */
+.terminal-bg {
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(22, 198, 96, 0.012) 2px,
+    rgba(22, 198, 96, 0.012) 4px
+  );
+}
+
+/* Green ticker stripe animation */
+@keyframes tickerScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }

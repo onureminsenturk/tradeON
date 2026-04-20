@@ -1,12 +1,12 @@
 export const chartColors = {
-  series: ['#06b6d4', '#8b5cf6', '#f59e0b', '#ec4899', '#10b981', '#f97316'],
-  profit: '#10b981',
-  loss: '#ef4444',
-  neutral: '#6b7280',
-  grid: 'rgba(75, 85, 99, 0.3)',
-  axisLabel: '#9ca3af',
-  tooltipBg: '#1f2937',
-  tooltipBorder: '#374151',
+  series: ['#16c660', '#f23535', '#fbb424', '#06b6d4', '#a855f7', '#f97316'],
+  profit: '#1fd660',
+  loss: '#f23535',
+  neutral: '#4d6550',
+  grid: 'rgba(36, 53, 38, 0.6)',
+  axisLabel: '#7da480',
+  tooltipBg: '#172119',
+  tooltipBorder: '#243526',
 };
 
 export const chartDefaults = {
