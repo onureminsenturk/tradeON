@@ -15,38 +15,36 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   }, [user, isLoading, router]);
 
   return (
-    <div className="min-h-screen bg-bg-primary flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background glows */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/3 left-1/4 w-[500px] h-[500px] bg-accent-primary/6 rounded-full blur-[100px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-loss/6 rounded-full blur-[100px]" />
-      </div>
-      {/* Mini bar chart decoration */}
-      <div className="absolute bottom-8 left-8 flex items-end gap-1 opacity-10">
-        {[30,55,40,70,50,85,60,95,75,88,65,100].map((h, i) => (
-          <div key={i} className="w-2 rounded-sm" style={{ height: `${h * 0.6}px`, backgroundColor: h > 60 ? '#16c660' : '#f23535' }} />
-        ))}
-      </div>
-      <div className="absolute top-8 right-8 flex items-end gap-1 opacity-10">
-        {[80,60,90,45,70,55,85,40,75,95,65,100].map((h, i) => (
-          <div key={i} className="w-2 rounded-sm" style={{ height: `${h * 0.5}px`, backgroundColor: h > 60 ? '#16c660' : '#f23535' }} />
-        ))}
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{ background: '#07060e' }}>
+      {/* Background ambient orbs */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="animate-float absolute -top-32 -left-32 w-[600px] h-[600px] rounded-full opacity-[0.07]" style={{ background: 'radial-gradient(circle, #a78bfa, transparent 70%)' }} />
+        <div className="animate-float absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full opacity-[0.06]" style={{ background: 'radial-gradient(circle, #60a5fa, transparent 70%)', animationDelay: '-4s' }} />
+        <div className="animate-float absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full opacity-[0.04]" style={{ background: 'radial-gradient(circle, #34d399, transparent 70%)', animationDelay: '-2s' }} />
+        {/* Grid pattern */}
+        <div className="absolute inset-0 opacity-[0.025]" style={{ backgroundImage: 'linear-gradient(rgba(167,139,250,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(167,139,250,0.8) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
       </div>
 
       <div className="relative z-10 w-full max-w-md">
-        <div className="text-center mb-8">
-          {/* Logo with mini chart */}
-          <div className="inline-flex items-center gap-3 mb-3">
-            <div className="flex items-end gap-0.5 h-8">
-              <div className="w-1.5 rounded-sm bg-loss/80" style={{ height: '45%' }} />
-              <div className="w-1.5 rounded-sm bg-loss/80" style={{ height: '60%' }} />
-              <div className="w-1.5 rounded-sm bg-profit" style={{ height: '75%' }} />
-              <div className="w-1.5 rounded-sm bg-profit" style={{ height: '90%' }} />
-              <div className="w-1.5 rounded-sm bg-accent-primary" style={{ height: '100%' }} />
+        {/* Logo */}
+        <div className="text-center mb-10">
+          <div className="inline-flex flex-col items-center gap-3">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-1" style={{ background: 'linear-gradient(135deg, rgba(167,139,250,0.2), rgba(96,165,250,0.15))', border: '1px solid rgba(167,139,250,0.25)', boxShadow: '0 0 40px rgba(167,139,250,0.15)' }}>
+              <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="url(#logoGrad)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <defs>
+                  <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#a78bfa" />
+                    <stop offset="50%" stopColor="#60a5fa" />
+                    <stop offset="100%" stopColor="#34d399" />
+                  </linearGradient>
+                </defs>
+                <path d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22" />
+                <path d="M15.75 7.5l3.75-1.5-1.5 3.75" />
+              </svg>
             </div>
-            <h1 className="text-4xl font-bold gradient-text tracking-wide">TradeON</h1>
+            <h1 className="text-4xl font-bold gradient-text tracking-tight">TradeON</h1>
+            <p className="text-text-muted text-sm font-medium">Profesyonel Trading Gunlugu</p>
           </div>
-          <p className="text-text-muted text-sm">Profesyonel Trading Gunlugu</p>
         </div>
         {children}
       </div>
